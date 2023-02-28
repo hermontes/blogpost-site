@@ -32,9 +32,9 @@ app.post("/createContent", async (req, res) => {
     image: image,
     comments: comments,
   });
-  
+
   try {
-    await post.save().then(() => console.log('User Saved Successfully!'))
+    await post.save().then(() => console.log("User Saved Successfully!"));
 
     res.send("data inserted");
   } catch (err) {
@@ -49,13 +49,49 @@ app.put("/makeComment", async (req, res) => {
   const newComment = {
     author: req.body.comments.name,
     text: req.body.comments.text,
-    likeCount:req.body.comments.likeCount,
-    dislikeCount:req.body.comments.dislikeCount
+    likeCount: req.body.comments.likeCount,
+    dislikeCount: req.body.comments.dislikeCount,
   };
 
   try {
     const put = await PostsStructure.findOne({ title: title });
     put.comments.push(newComment);
+    await put.save();
+
+    res.send("updated");
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.put("/updateLike", async (req, res) => {
+  const title = req.body.title;
+
+  const id = req.body.comments.id;
+  const newLikes = req.body.comments.likeCount;
+
+  try {
+    const put = await PostsStructure.findOne({ title: title });
+    const comment = put.comments.id(id);
+    comment.likeCount = newLikes;
+    await put.save();
+
+    res.send("updated");
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+app.put("/updateDislike", async (req, res) => {
+  const title = req.body.title;
+
+  const id = req.body.comments.id;
+  const newdislikeCount = req.body.comments.dislikeCount;
+
+  try {
+    const put = await PostsStructure.findOne({ title: title });
+    const comment = put.comments.id(id);
+    comment.dislikeCount = newdislikeCount;
     await put.save();
 
     res.send("updated");
