@@ -10,11 +10,7 @@ app.use(express.json());
 //Communicating with APIs
 app.use(cors());
 
-// require("dotenv").config({ path: path.resolve(__dirname, "Protected/.env") });
-// const URI = process.env.URI;
-// require('dotenv').config();
-
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect("mongodb+srv://:@random.qsyiiux.mongodb.net/blogposts?retryWrites=true&w=majority", {
   useNewUrlParser: true,
 });
 
