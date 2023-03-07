@@ -7,14 +7,16 @@ const PostsStructure = require("./models/PostsStructure");
 // To parse incoming JSON data
 app.use(express.json());
 
+//Communicating with APIs
 app.use(cors());
 
-mongoose.connect(
-  "mongodb+srv://htesfats:Umd.BlogPost@random.qsyiiux.mongodb.net/blogposts?retryWrites=true&w=majority",
-  {
-    useNewUrlParser: true,
-  }
-);
+// require("dotenv").config({ path: path.resolve(__dirname, "Protected/.env") });
+// const URI = process.env.URI;
+// require('dotenv').config();
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+});
 
 // Creating a new blog post
 app.post("/createContent", async (req, res) => {
@@ -35,16 +37,14 @@ app.post("/createContent", async (req, res) => {
 
   try {
     await post.save().then(() => console.log("User Saved Successfully!"));
-
     res.send("data inserted");
   } catch (err) {
     console.log(err);
-    // res.send("Data did not insert")
   }
 });
 
 app.put("/makeComment", async (req, res) => {
-  const title = req.body.title;
+  const id = req.body.id;
   // const newComment = req.body.comments
   const newComment = {
     author: req.body.comments.name,
@@ -54,7 +54,7 @@ app.put("/makeComment", async (req, res) => {
   };
 
   try {
-    const put = await PostsStructure.findOne({ title: title });
+    const put = await PostsStructure.findOne({ _id: id });
     put.comments.push(newComment);
     await put.save();
 
@@ -64,14 +64,15 @@ app.put("/makeComment", async (req, res) => {
   }
 });
 
+// Updating likes
 app.put("/updateLike", async (req, res) => {
-  const title = req.body.title;
+  const blogId = req.body.id;
 
   const id = req.body.comments.id;
   const newLikes = req.body.comments.likeCount;
 
   try {
-    const put = await PostsStructure.findOne({ title: title });
+    const put = await PostsStructure.findOne({ _id: blogId });
     const comment = put.comments.id(id);
     comment.likeCount = newLikes;
     await put.save();
@@ -82,14 +83,15 @@ app.put("/updateLike", async (req, res) => {
   }
 });
 
+// Updating dislikes
 app.put("/updateDislike", async (req, res) => {
-  const title = req.body.title;
+  const blogId = req.body.id;
 
   const id = req.body.comments.id;
   const newdislikeCount = req.body.comments.dislikeCount;
 
   try {
-    const put = await PostsStructure.findOne({ title: title });
+    const put = await PostsStructure.findOne({ _id: blogId });
     const comment = put.comments.id(id);
     comment.dislikeCount = newdislikeCount;
     await put.save();
@@ -100,13 +102,12 @@ app.put("/updateDislike", async (req, res) => {
   }
 });
 
+//Fetching all contents from MongoDB
 app.get("/getContent", async (req, res) => {
-  // PostsStructure.find({ $where:{ title:""},})
   PostsStructure.find({}, (err, result) => {
     if (err) {
       res.send(err);
     }
-
     res.send(result);
   });
 });
